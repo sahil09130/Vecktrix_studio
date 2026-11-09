@@ -53,6 +53,8 @@ export interface ServiceSceneProps {
   focusedKey: string | null;
   onOpen: (t: TileItem) => void;
   containerRef: RefObject<HTMLDivElement | null>;
+  /** Called once if the scene is too slow on this device (switches to the lite layout). */
+  onSlow?: () => void;
 }
 
 /**
@@ -88,12 +90,24 @@ export default function ServiceScene(props: ServiceSceneProps) {
   );
 }
 
-function Scene({ tiles, layout, focusedKey, onOpen, containerRef }: ServiceSceneProps) {
+function Scene({ tiles, layout, focusedKey, onOpen, containerRef, onSlow }: ServiceSceneProps) {
   const { size, gl } = useThree();
   const mobile = layout.mobile;
   const [fonts, setFonts] = useState<Fonts | null>(null);
   const view = useRef<View>({ top: 0, vh: 800 });
   const pointer = useRef<Pointer>({ x: 0, y: 0 });
+  // Frame-rate check over the first few seconds. Below ~28 fps, hand over to the lite layout.
+  const fps = useRef({ frames: 0, time: 0, done: false });
+  useFrame((_state, dt) => {
+    const f = fps.current;
+    if (f.done) return;
+    f.frames += 1;
+    f.time += Math.min(dt, 0.25);
+    if (f.time >= 3) {
+      f.done = true;
+      if (f.frames / f.time < 28) onSlow?.();
+    }
+  });
 
   useEffect(() => {
     let alive = true;

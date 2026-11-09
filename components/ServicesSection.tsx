@@ -4,8 +4,8 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { categories, servicesCopy, type Category } from "@/content/services";
-import { hasWebGL, usePrefersReducedMotion } from "@/lib/hooks";
+import { categories, servicesCopy } from "@/content/services";
+import { hasWebGL, useMediaQuery, usePrefersReducedMotion } from "@/lib/hooks";
 import {
   categoryHref,
   deliveredBy,
@@ -18,8 +18,8 @@ import { computeLayout, ctaKey, tileOffsetPx } from "@/lib/tiles-layout";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { CategoryHeading } from "./CategoryHeading";
 import { SoundToggle } from "./SoundToggle";
+import { ServicesLite } from "./ServicesLite";
 import { SectorHud } from "./SectorHud";
-import { KritBadge } from "./KritBadge";
 import type { TileItem } from "./three/ServiceScene";
 
 // The 3D scene (three.js + R3F) is only fetched on the client, near the section.
@@ -108,64 +108,6 @@ function TileLink({
   );
 }
 
-/** Plain list. Visible when 3D is off (no WebGL or reduced motion). */
-function FallbackList() {
-  return (
-    <div className="services-fallback container-x space-y-20 pb-24 pt-8">
-      {categories.map((category: Category) => {
-        const feat = featuredServices(category.slug);
-        const total = servicesInCategory(category.slug).length;
-        return (
-          <section
-            key={category.slug}
-            id={`cat-${category.slug}`}
-            aria-labelledby={`cat-${category.slug}-title`}
-          >
-            <h3
-              id={`cat-${category.slug}-title`}
-              className="font-display text-3xl font-bold tracking-tight md:text-5xl"
-            >
-              <span className="mr-3 font-mono text-base font-medium text-accent">
-                {category.number}.
-              </span>
-              {category.title}
-            </h3>
-            <p className="mt-3 max-w-xl text-muted">{category.intro}</p>
-            <ul className="mt-8 grid gap-4 md:grid-cols-2">
-              {feat.map((s) => (
-                <li key={s.slug}>
-                  <TileLink
-                    k={s.slug}
-                    className="block h-full rounded-2xl border border-line bg-surface p-6 transition-colors hover:border-accent"
-                  >
-                    <span className="flex items-start justify-between gap-3">
-                      <span className="font-display text-2xl font-bold leading-tight">{s.name}</span>
-                      {s.group === "KritCuts" && <KritBadge />}
-                    </span>
-                    <span className="mt-3 block text-muted">{s.description}</span>
-                    <span className="eyebrow mt-6 block">{deliveredBy(s.group)}</span>
-                  </TileLink>
-                </li>
-              ))}
-              <li>
-                <TileLink
-                  k={ctaKey(category.slug)}
-                  className="flex h-full flex-col justify-between rounded-2xl border border-accent/60 bg-surface p-6 transition-colors hover:border-accent"
-                >
-                  <span className="font-display text-2xl font-bold leading-tight">
-                    View all {total} services
-                  </span>
-                  <span className="mt-6 block text-accent">{category.title} &rarr;</span>
-                </TileLink>
-              </li>
-            </ul>
-          </section>
-        );
-      })}
-    </div>
-  );
-}
-
 export function ServicesSection() {
   const router = useRouter();
   const reduced = usePrefersReducedMotion();
@@ -174,7 +116,18 @@ export function ServicesSection() {
   const [near, setNear] = useState(false);
   const [focused, setFocused] = useState<string | null>(null);
   const [dims, setDims] = useState<{ w: number; vh: number } | null>(null);
+  const [forced, setForced] = useState<"lite" | "3d" | null>(null);
+  const narrow = useMediaQuery("(max-width: 767px)");
   const stage = useRef<HTMLDivElement>(null);
+
+  // ?services=lite or ?services=3d forces a mode, to compare on a real phone.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("services");
+    if (q === "lite" || q === "3d") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setForced(q);
+    }
+  }, []);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -197,8 +150,13 @@ export function ServicesSection() {
     [dims],
   );
 
-  const use3D = webgl === true && !reduced && !failed && !!layout;
-  const pending = webgl === null || !dims;
+  // Phones and browsers without WebGL get the lite layout. Desktop gets the 3D stage.
+  const use3D =
+    !failed &&
+    !!layout &&
+    webgl === true &&
+    !reduced &&
+    (forced === "3d" || (forced !== "lite" && !narrow));
 
   useEffect(() => {
     const el = stage.current;
@@ -238,9 +196,6 @@ export function ServicesSection() {
 
   return (
     <section id="services" aria-labelledby="services-heading" className="relative">
-      <noscript>
-        <style>{".services-list{position:static!important;width:auto!important;height:auto!important;clip:auto!important;margin:0!important;overflow:visible!important}"}</style>
-      </noscript>
 
       <div className="container-x pt-20 md:pt-28">
         <p className="eyebrow mb-4">{servicesCopy.eyebrow}</p>
@@ -276,6 +231,7 @@ export function ServicesSection() {
             {near && (
               <ErrorBoundary onError={() => setFailed(true)}>
                 <ServiceScene
+                  onSlow={() => setFailed(true)}
                   tiles={tiles}
                   layout={layout}
                   focusedKey={focused}
@@ -317,14 +273,8 @@ export function ServicesSection() {
           </div>
 
         </div>
-      ) : pending ? (
-        <div className="min-h-[300vh]">
-          <div className="services-list sr-only">
-            <FallbackList />
-          </div>
-        </div>
       ) : (
-        <FallbackList />
+        <ServicesLite animated={!reduced} />
       )}
     </section>
   );

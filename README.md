@@ -134,3 +134,13 @@ To add the video, set one of these in `introVideo` in `content/site.ts`:
 The video only loads when the dialog opens.
 
 The call to action plays a short attention sequence on load (beam powers on, a play dot ripples, the label shines, a cursor taps the screen), then settles after about 18 seconds. Hovering brings the ripples back. Timings are in `app/globals.css` (search for "Attention sequence"). The `0:30` chip comes from `introVideo.duration` in `content/site.ts`: update it if you change the video, or leave it empty to hide the chip.
+
+## Services on phones and the 3D stage
+
+The services section has two layouts:
+- **Lite** (phones, screens under 768px, and browsers without WebGL, or with reduced motion): normal HTML and links, with CSS transform and opacity motion only. Each tile's line illustration is a small 2D canvas that draws only while on screen. This is what phones get.
+- **3D** (desktop with WebGL): the asteroid stage. If it runs below about 28 fps, it switches to lite on its own.
+
+To compare on a real phone, add `?services=lite` or `?services=3d` to the address.
+
+On phones (under 768px), each practice is a "cargo bay": a spaceship-like cylinder where its services start as a neat brick wall (`components/ServicesPlayground.tsx`). Drag a brick and it moves like in zero gravity: it keeps drifting after you let go, knocks other bricks, bounces off the walls and slowly comes to rest (`lib/zero-g.ts`, no physics library). "Restack" rebuilds the wall. A tap without a drag opens the service. The simulation only runs while something moves and the bay is on screen. With reduced motion, bricks move only while dragged.

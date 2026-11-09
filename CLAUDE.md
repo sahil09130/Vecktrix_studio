@@ -39,3 +39,4 @@
 - `npm run lint` and `npx tsc --noEmit`: run both after every change
 - `npm run build`: production build
 - The hero intro video is a placeholder until a real video is supplied (`introVideo` in `content/site.ts`). Do not add a fake video.
+- Phones and browsers without WebGL get the lite services layout (`components/ServicesLite.tsx`): HTML and links, with CSS transform and opacity motion only. Never run WebGL on phones. The 3D scene stays lazy-loaded and desktop only.

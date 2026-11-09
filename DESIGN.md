@@ -243,3 +243,7 @@ Labels       JetBrains Mono       (Medium 500, UPPERCASE, +14%)
 **Hero projector:** a line-art film projector beside the headline, its beam in orange fading to nothing, opens the intro video. Use the same line style for any projector or screen motif.
 
 **Attention motion:** calls to action may play a short, finite sequence (a few ripples, one shine, one cursor tap) and then settle. Never loop attention motion forever beside the headline.
+
+**Phone motion:** tiles arrive from their side with a slight perspective turn, then float gently. Use transform and opacity only, and keep every loop slow.
+
+**Phone services:** each practice is a dark metal cylinder ("cargo bay") holding its services as bricks in four tones made only from the site palette: ember for the practice's featured services, then rust, smoke and graphite. Ember and rust take a warm base that is different for each practice, mixed into the dark surface: 01 coral `#FF5B45`, 02 amber `#FF9A2E`, 03 terracotta `#E0653F`, 04 copper `#D98A45`, 05 rose-ember `#FF5470`, 06 peach sand `#EDA27C`, 07 clay `#C9775A`. Keep bases in the red-orange to amber family (avoid yellow-greens, which turn olive on the dark surface), and keep cream text at 4.5:1 or better. Text is always cream. Bright orange is reserved for the brick being held, the KritCuts dot and the bay's status light. Bricks start as a staggered wall and float in zero gravity when moved.

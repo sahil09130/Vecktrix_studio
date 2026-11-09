@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { drawArt, getMotif, type MotifId } from "@/components/motion";
 import { usePrefersReducedMotion } from "@/lib/hooks";
+import { subscribeTicker as subscribe } from "@/lib/ticker";
 
 /** Time each slide stays up before advancing (ms). */
 const INTERVAL = 4200;
@@ -10,29 +11,6 @@ const INTERVAL = 4200;
 const FADE = 380;
 /** Motif time used for the still frame when reduced motion is on (s). */
 const STILL_T = 2.4;
-
-/* ------------------------------------------------------------------ */
-/* One shared animation loop for every visible carousel, capped at 30fps. */
-
-type Tick = (now: number) => void;
-const ticks = new Set<Tick>();
-let raf = 0;
-let last = 0;
-
-function frame(now: number) {
-  raf = ticks.size ? requestAnimationFrame(frame) : 0;
-  if (now - last < 1000 / 30 - 2) return;
-  last = now;
-  ticks.forEach((f) => f(now));
-}
-
-function subscribe(f: Tick) {
-  ticks.add(f);
-  if (!raf) raf = requestAnimationFrame(frame);
-  return () => {
-    ticks.delete(f);
-  };
-}
 
 function hash(s: string) {
   let h = 0;

@@ -363,3 +363,462 @@ body {
   -webkit-text-fill-color: var(--accent);
   animation: none;
 }
+
+/* ------------------------------------------------------------------
+   Lite services section (phones and no-WebGL). Compositor-only motion:
+   transform and opacity. Content is visible before JavaScript runs; the
+   `lite-animated` class (set after mount) switches the reveals on.
+------------------------------------------------------------------- */
+.lite-chapter {
+  position: relative;
+  padding-top: 5rem;
+  padding-bottom: 4rem;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 1100px;
+  overflow-x: clip;
+}
+.lite-sector {
+  position: sticky;
+  top: 4.75rem;
+  z-index: 3;
+  display: inline-block;
+  margin: 0 0 1.25rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 9999px;
+  border: 1px solid var(--line);
+  background: rgba(7, 8, 12, 0.88);
+  backdrop-filter: blur(6px);
+  pointer-events: none;
+}
+
+.lite-head .lite-rule {
+  display: inline-block;
+  width: 2.5rem;
+  height: 1px;
+  background: var(--accent);
+  vertical-align: middle;
+  margin-right: 0.75rem;
+  transform-origin: left center;
+}
+
+.lite-tiles {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 3rem;
+  perspective: 900px;
+}
+@media (min-width: 768px) {
+  .lite-tiles {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.75rem;
+  }
+}
+
+.lite-tile {
+  position: relative;
+  z-index: 1;
+}
+.lite-tile.left {
+  margin-right: 14%;
+}
+.lite-tile.right {
+  margin-left: 14%;
+}
+@media (min-width: 768px) {
+  .lite-tile.left,
+  .lite-tile.right {
+    margin: 0;
+  }
+  .lite-tile.right {
+    margin-top: 3rem;
+  }
+}
+
+.lite-slab {
+  display: block;
+  border-radius: 1.5rem;
+  border: 1px solid var(--line);
+  background: linear-gradient(160deg, #161924 0%, #0b0c12 100%);
+  padding: 1.25rem;
+  transition: border-color 0.25s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.lite-slab:hover,
+.lite-slab:focus-visible,
+.lite-slab:active {
+  border-color: var(--accent);
+}
+.lite-slab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.lite-slab-cta {
+  border-color: rgba(255, 77, 46, 0.55);
+  background: linear-gradient(160deg, #22161a 0%, #0b0c12 100%);
+}
+
+.lite-art {
+  display: block;
+  position: relative;
+  aspect-ratio: 16 / 10;
+  margin: 0.9rem 0 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(242, 239, 233, 0.08);
+  background: rgba(7, 8, 12, 0.6);
+  overflow: hidden;
+}
+.lite-art canvas {
+  display: block;
+}
+.lite-art-cta {
+  display: grid;
+  place-items: center;
+  padding: 0.5rem;
+}
+.lite-art-cta svg {
+  max-height: 100%;
+  width: auto;
+  aspect-ratio: 1;
+}
+
+/* Motion on, only after mount. Reveals run once per element. */
+.lite-animated [data-reveal] {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.7s ease,
+    transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: calc(var(--i, 0) * 90ms);
+}
+.lite-animated [data-reveal].is-in {
+  opacity: 1;
+  transform: none;
+}
+.lite-animated .lite-tile.left[data-reveal]:not(.is-in) {
+  transform: translate(-36px, 28px) rotateY(16deg) scale(0.94);
+  transform-origin: left center;
+}
+.lite-animated .lite-tile.right[data-reveal]:not(.is-in) {
+  transform: translate(36px, 28px) rotateY(-16deg) scale(0.94);
+  transform-origin: right center;
+}
+.lite-animated .lite-head[data-reveal] {
+  transition-duration: 1s;
+}
+.lite-animated .lite-head .lite-rule {
+  transform: scaleX(0);
+  transition: transform 1.1s cubic-bezier(0.2, 0.7, 0.2, 1) 0.2s;
+}
+.lite-animated .lite-head.is-in .lite-rule {
+  transform: scaleX(1);
+}
+
+/* Gentle float after a tile has arrived. Off-screen chapters are skipped by content-visibility. */
+.lite-animated .lite-tile.is-in .lite-tile-float {
+  animation: lite-float 6s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * -1.3s);
+}
+@keyframes lite-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* Backdrop per practice. Glow and stars drift slowly; the planet turns. */
+.lite-glow {
+  position: absolute;
+  z-index: 0;
+  width: 70vw;
+  height: 70vw;
+  max-width: 520px;
+  max-height: 520px;
+  top: 20%;
+  left: -20vw;
+  border-radius: 9999px;
+  background: radial-gradient(closest-side, rgba(255, 77, 46, 0.16), rgba(255, 77, 46, 0) 70%);
+  pointer-events: none;
+}
+.lite-glow[data-side="left"] {
+  left: auto;
+  right: -20vw;
+}
+.lite-stars {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, rgba(242, 239, 233, 0.5), transparent),
+    radial-gradient(1px 1px at 78% 42%, rgba(242, 239, 233, 0.4), transparent),
+    radial-gradient(1.5px 1.5px at 40% 74%, rgba(255, 77, 46, 0.45), transparent),
+    radial-gradient(1px 1px at 88% 86%, rgba(242, 239, 233, 0.35), transparent),
+    radial-gradient(1px 1px at 22% 58%, rgba(242, 239, 233, 0.3), transparent);
+  background-size: 260px 260px;
+  opacity: 0.8;
+}
+.lite-animated .lite-stars {
+  animation: lite-stars 90s linear infinite;
+}
+@keyframes lite-stars {
+  to { background-position: 260px 130px; }
+}
+.lite-planet {
+  position: absolute;
+  z-index: 0;
+  right: -18vw;
+  bottom: 8%;
+  width: 52vw;
+  height: 52vw;
+  max-width: 280px;
+  max-height: 280px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 35% 30%, #1b1d26, #07080c 70%);
+  box-shadow: inset -12px -6px 40px rgba(255, 77, 46, 0.18), 0 0 60px rgba(255, 77, 46, 0.08);
+  pointer-events: none;
+}
+.lite-planet-ring {
+  position: absolute;
+  inset: -22% -40%;
+  border-radius: 9999px;
+  border: 1px solid rgba(242, 239, 233, 0.14);
+  transform: rotate(-18deg) scaleY(0.32);
+}
+.lite-animated .lite-planet {
+  animation: lite-turn 120s linear infinite;
+}
+@keyframes lite-turn {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lite-animated [data-reveal],
+  .lite-animated [data-reveal].is-in,
+  .lite-animated .lite-tile.is-in .lite-tile-float,
+  .lite-animated .lite-stars,
+  .lite-animated .lite-planet {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
+
+
+/* Phone "cargo bay": services as bricks floating in a spaceship cylinder (ServicesPlayground).
+   Site palette only: dark surfaces, cream text, hairlines, one orange accent. */
+.zg-bay {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  touch-action: pan-y;
+  /* Elliptical corners make the top and bottom read as the ends of a cylinder. */
+  border-radius: 50% / 38px;
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(120% 35% at 50% 100%, var(--bay-glow, transparent), transparent 70%),
+    linear-gradient(90deg, #08090d 0%, #12141c 16%, #1b1e29 50%, #12141c 84%, #08090d 100%);
+  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.65), 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+.zg-rim {
+  position: absolute;
+  left: 7%;
+  right: 7%;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid rgba(242, 239, 233, 0.14);
+  background: radial-gradient(ellipse at center, #07080c 50%, #1a1d28 100%);
+  pointer-events: none;
+}
+.zg-rim-top {
+  top: 8px;
+}
+.zg-rim-bottom {
+  bottom: 8px;
+  opacity: 0.6;
+}
+/* Panel seams with rivets near both walls. */
+.zg-seams {
+  position: absolute;
+  inset: 44px 0 40px;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(180deg, transparent 0 139px, rgba(242, 239, 233, 0.07) 139px 140px),
+    radial-gradient(circle at 14px 50%, rgba(242, 239, 233, 0.22) 1.4px, transparent 2px),
+    radial-gradient(circle at calc(100% - 14px) 50%, rgba(242, 239, 233, 0.22) 1.4px, transparent 2px);
+  background-size: 100% 140px, 100% 140px, 100% 140px;
+  background-position: 0 0, 0 70px, 0 70px;
+  background-repeat: repeat-y;
+}
+/* Faint glass glare down one side. */
+.zg-glare {
+  position: absolute;
+  top: 44px;
+  bottom: 40px;
+  left: 13%;
+  width: 14px;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, rgba(242, 239, 233, 0), rgba(242, 239, 233, 0.07) 30%, rgba(242, 239, 233, 0.02) 80%, rgba(242, 239, 233, 0));
+  pointer-events: none;
+}
+.zg-hud {
+  position: absolute;
+  top: 40px;
+  left: 18px;
+  right: 18px;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  pointer-events: none;
+}
+.zg-light {
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  background: #3a3d48;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+.zg-light.on {
+  background: var(--accent);
+  box-shadow: 0 0 10px rgba(255, 77, 46, 0.8);
+}
+.zg-restack {
+  pointer-events: auto;
+  border: 1px solid var(--line);
+  border-radius: 9999px;
+  padding: 0.3rem 0.7rem;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: var(--fg);
+  background: rgba(7, 8, 12, 0.7);
+}
+.zg-restack:active {
+  border-color: var(--accent);
+}
+.zg-brick {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0 0.8rem;
+  border-radius: 0.8rem;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, #181b26 0%, #0e1016 100%);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(242, 239, 233, 0.06);
+  color: var(--fg);
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  will-change: transform;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+/* Ember tones: only the site's orange and cream mixed into its dark surface (precomputed). */
+.zg-tone-ember {
+  background: linear-gradient(180deg, var(--ember-t, #4f2728) 0%, var(--ember-b, #301919) 100%);
+  border-color: var(--ember-bd, rgba(255, 77, 46, 0.35));
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 190, 170, 0.12);
+}
+.zg-tone-rust {
+  background: linear-gradient(180deg, var(--rust-t, #342127) 0%, var(--rust-b, #1f1418) 100%);
+  border-color: var(--rust-bd, rgba(255, 77, 46, 0.2));
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 190, 170, 0.08);
+}
+.zg-tone-smoke {
+  background: linear-gradient(180deg, #292c36 0%, #191b21 100%);
+  border-color: rgba(242, 239, 233, 0.14);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(242, 239, 233, 0.09);
+}
+.zg-tone-graphite {
+  background: linear-gradient(180deg, #181b26 0%, #0e1016 100%);
+  border-color: var(--line);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(242, 239, 233, 0.06);
+}
+.zg-brick-idx {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+.zg-brick-name {
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 15.5px;
+  letter-spacing: -0.01em;
+}
+.zg-kc {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  margin-left: auto;
+  border-radius: 9999px;
+  background: var(--accent);
+}
+.zg-brick.is-held {
+  z-index: 5;
+  cursor: grabbing;
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px rgba(242, 239, 233, 0.22), 0 0 0 1px rgba(255, 77, 46, 0.35), 0 0 24px rgba(255, 77, 46, 0.3), 0 12px 24px rgba(0, 0, 0, 0.55);
+}
+.zg-brick:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* On phones the cargo bay's own label names the practice, so the sticky sector pill is not needed. */
+@media (max-width: 767px) {
+  .lite-sector {
+    display: none;
+  }
+}
+
+/* Per-practice warm base for the brick bays. Each is the practice colour mixed into the dark surface
+   (precomputed hex). Stays in the red-orange to amber family and dark, so the theme holds. */
+.zg-bay[data-bay="01"] { /* coral */
+  --ember-t: #482221; --ember-b: #301a1d; --ember-bd: rgba(255, 91, 69, 0.35);
+  --rust-t: #2b191c; --rust-b: #1f1519; --rust-bd: rgba(255, 91, 69, 0.2);
+  --bay-glow: rgba(255, 91, 69, 0.08);
+}
+.zg-bay[data-bay="02"] { /* amber */
+  --ember-t: #48311c; --ember-b: #302319; --ember-bd: rgba(255, 154, 46, 0.35);
+  --rust-t: #2b2119; --rust-b: #1f1a18; --rust-bd: rgba(255, 154, 46, 0.2);
+  --bay-glow: rgba(255, 154, 46, 0.08);
+}
+.zg-bay[data-bay="03"] { /* terracotta */
+  --ember-t: #402420; --ember-b: #2b1c1c; --ember-bd: rgba(224, 101, 63, 0.35);
+  --rust-t: #271a1b; --rust-b: #1d1619; --rust-bd: rgba(224, 101, 63, 0.2);
+  --bay-glow: rgba(224, 101, 63, 0.08);
+}
+.zg-bay[data-bay="04"] { /* copper */
+  --ember-t: #3f2d21; --ember-b: #2a211d; --ember-bd: rgba(217, 138, 69, 0.35);
+  --rust-t: #261f1c; --rust-b: #1c1919; --rust-bd: rgba(217, 138, 69, 0.2);
+  --bay-glow: rgba(217, 138, 69, 0.08);
+}
+.zg-bay[data-bay="05"] { /* rose-ember */
+  --ember-t: #48202c; --ember-b: #301a23; --ember-bd: rgba(255, 84, 112, 0.35);
+  --rust-t: #2b1821; --rust-b: #1f151c; --rust-bd: rgba(255, 84, 112, 0.2);
+  --bay-glow: rgba(255, 84, 112, 0.08);
+}
+.zg-bay[data-bay="06"] { /* peach sand */
+  --ember-t: #44332e; --ember-b: #2d2424; --ember-bd: rgba(237, 162, 124, 0.35);
+  --rust-t: #292222; --rust-b: #1e1a1d; --rust-bd: rgba(237, 162, 124, 0.2);
+  --bay-glow: rgba(237, 162, 124, 0.08);
+}
+.zg-bay[data-bay="07"] { /* clay */
+  --ember-t: #3b2926; --ember-b: #281e20; --ember-bd: rgba(201, 119, 90, 0.35);
+  --rust-t: #241c1e; --rust-b: #1b171b; --rust-bd: rgba(201, 119, 90, 0.2);
+  --bay-glow: rgba(201, 119, 90, 0.08);
+}
