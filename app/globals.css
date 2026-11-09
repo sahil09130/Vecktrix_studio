@@ -1,0 +1,365 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   Design tokens. Change colours here and everything follows.
+------------------------------------------------------------------- */
+:root {
+  --bg: #07080c;
+  --fg: #f2efe9;
+  --muted: #9a978f;
+  --accent: #ff4d2e;
+  --surface: #0e1016;
+  --surface-2: #14161e;
+  --line: rgba(242, 239, 233, 0.12);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+}
+
+html {
+  background: var(--bg);
+  color-scheme: dark;
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+  overflow-x: clip;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+@utility container-x {
+  width: 100%;
+  max-width: 1320px;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+  @media (min-width: 768px) {
+    padding-inline: 2.5rem;
+  }
+}
+
+/* Small uppercase mono label */
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ------------------------------------------------------------------
+   Motion
+------------------------------------------------------------------- */
+@keyframes marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes orbit {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.marquee-track {
+  animation: marquee 48s linear infinite;
+  width: max-content;
+}
+.marquee:hover .marquee-track,
+.marquee:focus-within .marquee-track {
+  animation-play-state: paused;
+}
+
+.orbit {
+  animation: orbit var(--orbit-speed, 60s) linear infinite;
+  transform-origin: 50% 50%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .marquee-track {
+    animation: none;
+    flex-wrap: wrap;
+    width: auto;
+  }
+  .marquee-dup {
+    display: none;
+  }
+}
+
+/* Static ember-and-slate haze behind the plain services list (reduced motion / no WebGL). */
+.services-fallback {
+  background:
+    radial-gradient(60% 40% at 15% 20%, rgba(255, 77, 46, 0.09), transparent 70%),
+    radial-gradient(50% 35% at 90% 60%, rgba(255, 77, 46, 0.06), transparent 70%),
+    radial-gradient(70% 50% at 50% 100%, rgba(20, 24, 33, 0.9), transparent 70%);
+}
+
+/* ------------------------------------------------------------------
+   Hero projector (opens the intro video)
+------------------------------------------------------------------- */
+.projector-in {
+  animation: projector-in 0.9s ease-out 1.2s both;
+}
+@keyframes projector-in {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-50% + 6px));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%);
+  }
+}
+
+/* Beam sits softer until the projector is hovered or focused. */
+.hero-projector .proj-beam {
+  opacity: 0.55;
+  transition: opacity 0.4s ease;
+}
+.hero-projector:hover .proj-beam,
+.hero-projector:focus-visible .proj-beam {
+  opacity: 1;
+}
+.proj-flick {
+  transform-box: fill-box;
+  transform-origin: 0 50%;
+  /* Power-on grows the beam out of the lens, then it flickers forever. */
+  animation:
+    proj-power 0.9s ease-out 1.4s backwards,
+    proj-flicker 3.4s ease-in-out infinite;
+}
+@keyframes proj-flicker {
+  0%, 100% { opacity: 0.85; }
+  46% { opacity: 0.95; }
+  50% { opacity: 0.7; }
+  54% { opacity: 0.95; }
+}
+
+.proj-reel {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: proj-spin 7s linear infinite;
+}
+.proj-reel-2 {
+  animation-duration: 9s;
+  animation-direction: reverse;
+}
+@keyframes proj-spin {
+  to { transform: rotate(360deg); }
+}
+
+.proj-lens {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: proj-pulse 2.6s ease-in-out infinite;
+}
+@keyframes proj-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.12); opacity: 1; }
+}
+
+.proj-dust {
+  animation: proj-drift 5.5s linear infinite;
+}
+.proj-dust-2 {
+  animation-delay: -2s;
+  animation-duration: 6.5s;
+}
+.proj-dust-3 {
+  animation-delay: -3.5s;
+  animation-duration: 4.8s;
+}
+@keyframes proj-drift {
+  0% { transform: translate(-14px, 3px); opacity: 0; }
+  20% { opacity: 0.9; }
+  80% { opacity: 0.9; }
+  100% { transform: translate(14px, -3px); opacity: 0; }
+}
+
+/* Dialog open: a short fade and rise (reduced motion removes it). */
+.intro-dialog[open] {
+  animation: intro-dialog-in 0.35s ease-out;
+}
+@keyframes intro-dialog-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ------------------------------------------------------------------
+   Attention sequence for the intro call to action.
+   Everything here has a finite count, so it settles by itself after about
+   18 seconds. Hover or keyboard focus brings the ripples back. The final
+   state of every animation is the calm resting look.
+------------------------------------------------------------------- */
+@keyframes proj-power {
+  0% { transform: scaleX(0); filter: brightness(2.2); }
+  60% { transform: scaleX(1.08); filter: brightness(1.8); }
+  100% { transform: scaleX(1); filter: brightness(1); }
+}
+
+.proj-screen {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation:
+    proj-screen-on 0.8s steps(1, end) 1.8s backwards,
+    proj-screen-tap 7s ease-in-out 4s 2;
+}
+@keyframes proj-screen-on {
+  0% { opacity: 0; }
+  25% { opacity: 1; }
+  40% { opacity: 0.2; }
+  60% { opacity: 1; }
+  75% { opacity: 0.3; }
+  100% { opacity: 1; }
+}
+@keyframes proj-screen-tap {
+  0%, 33% { transform: scale(1); }
+  37% { transform: scale(1.07); }
+  45%, 100% { transform: scale(1); }
+}
+
+.proj-tap-ring {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: proj-tap-ring 7s ease-out 4s 2;
+}
+@keyframes proj-tap-ring {
+  0%, 33% { opacity: 0; transform: scale(0.5); }
+  35% { opacity: 0.9; transform: scale(0.6); }
+  50%, 100% { opacity: 0; transform: scale(3); }
+}
+
+.proj-cursor {
+  opacity: 0;
+  animation: proj-cursor 7s ease-in-out 4s 2;
+}
+@keyframes proj-cursor {
+  0% { opacity: 0; transform: translate(46px, 40px) scale(1); }
+  8% { opacity: 1; }
+  30% { opacity: 1; transform: translate(0, 0) scale(1); }
+  34% { transform: translate(0, 0) scale(0.82); }
+  40% { transform: translate(0, 0) scale(1); }
+  50% { opacity: 1; transform: translate(0, 0) scale(1); }
+  56%, 100% { opacity: 0; transform: translate(0, 0) scale(1); }
+}
+
+/* Play dot ripples (projector chip and phone pill). */
+.chip-dot {
+  transition: transform 0.25s ease;
+}
+.chip-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 1px solid var(--accent);
+  opacity: 0;
+  animation: chip-ripple 2.4s ease-out 3s 4;
+}
+.chip-ring-2 {
+  animation-delay: 3.8s;
+}
+@keyframes chip-ripple {
+  0% { opacity: 0.7; transform: scale(1); }
+  100% { opacity: 0; transform: scale(2.6); }
+}
+
+/* Text shine: an orange highlight sweeps across, three times. */
+.chip-text {
+  --chip-base: rgba(242, 239, 233, 0.8);
+  background-image: linear-gradient(100deg, var(--chip-base) 42%, var(--accent) 50%, var(--chip-base) 58%);
+  background-size: 260% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: chip-shine 4s linear 3s 3;
+}
+.chip-text-pill {
+  --chip-base: #f2efe9;
+}
+@keyframes chip-shine {
+  from { background-position: 100% 0; }
+  to { background-position: 0 0; }
+}
+
+.hero-projector .proj-chip {
+  transition: border-color 0.25s ease;
+}
+
+/* Hover and keyboard focus: ripples run for as long as the pointer is there. */
+.hero-projector:hover .chip-ring,
+.hero-projector:focus-visible .chip-ring,
+.intro-pill:hover .chip-ring,
+.intro-pill:focus-visible .chip-ring {
+  animation: chip-ripple 1.6s ease-out infinite;
+}
+.hero-projector:hover .chip-ring-2,
+.hero-projector:focus-visible .chip-ring-2,
+.intro-pill:hover .chip-ring-2,
+.intro-pill:focus-visible .chip-ring-2 {
+  animation-delay: 0.8s;
+}
+.hero-projector:hover .chip-dot,
+.hero-projector:focus-visible .chip-dot,
+.intro-pill:hover .chip-dot,
+.intro-pill:focus-visible .chip-dot {
+  transform: scale(1.1);
+}
+.hero-projector:hover .proj-chip,
+.hero-projector:focus-visible .proj-chip {
+  border-color: var(--accent);
+}
+.hero-projector:hover .chip-text,
+.hero-projector:focus-visible .chip-text,
+.intro-pill:hover .chip-text,
+.intro-pill:focus-visible .chip-text {
+  background-image: none;
+  color: var(--accent);
+  -webkit-text-fill-color: var(--accent);
+  animation: none;
+}
